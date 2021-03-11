@@ -125,7 +125,7 @@ java -jar ./target/SyntheticLoadGenerator-1.0-SNAPSHOT-jar-with-dependencies.jar
    --emitOne
 ```
 
-![Deeply nested branch](images/hackathon-large-trace.jpg?raw=true "Deeply nested branch")
+![Deeply nested branch](images/hackathon-large-trace.png?raw=true "Deeply nested branch")
 
 
 ### Emit single slow trace
@@ -136,7 +136,7 @@ java -jar ./target/SyntheticLoadGenerator-1.0-SNAPSHOT-jar-with-dependencies.jar
    --emitOne
 ```
 
-![High latency trace](images/hackathon-high-latency.jpg?raw=true "High latency trace")
+![High latency trace](images/hackathon-high-latency.png?raw=true "High latency trace")
 
 This assumes that you have the `jaeger-collector` component running and listening
 on port 14268 for thrift/HTTP protocol/transport.

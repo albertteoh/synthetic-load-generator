@@ -52,6 +52,9 @@ public class App {
     @Parameter(names = "--flushIntervalMillis", description = "How often to flush traces", required = false)
     private long flushIntervalMillis = TimeUnit.SECONDS.toMillis(5);
 
+    @Parameter(names = "--emitOne", description = "Emit only one trace", required = false)
+    private boolean emitOne = false;
+
     @Parameter(names = { "--help", "-h" }, help = true)
     private boolean help;
 
@@ -77,6 +80,11 @@ public class App {
                 }
             });
             app.init();
+            if (app.emitOne) {
+                System.out.println("Emitting only one trace");
+                app.emitOneTrace();
+                return;
+            }
             app.start();
         } catch (Exception e) {
             logger.error("Error running load generator: " + e, e);
@@ -117,6 +125,12 @@ public class App {
             gen.start();
         }
         latch.await();
+    }
+
+    public void emitOneTrace() {
+        for (ScheduledTraceGenerator gen : this.scheduledTraceGenerators) {
+            gen.emitOneTrace();
+        }
     }
 
     public void shutdown() throws Exception {

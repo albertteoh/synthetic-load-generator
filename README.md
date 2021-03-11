@@ -104,8 +104,39 @@ mvn package
 
 Running locally with sample topology:
 ```
-java -jar ./target/SyntheticLoadGenerator-1.0-SNAPSHOT-jar-with-dependencies.jar  --paramsFile ./topologies/hipster-shop.json --jaegerCollectorUrl http://localhost:14268
+java -jar ./target/SyntheticLoadGenerator-1.0-SNAPSHOT-jar-with-dependencies.jar \
+   --paramsFile ./topologies/hipster-shop.json \
+   --jaegerCollectorUrl http://localhost:14268
 ```
+
+### Emit single "normal" trace
+```
+java -jar ./target/SyntheticLoadGenerator-1.0-SNAPSHOT-jar-with-dependencies.jar \
+   --paramsFile ./topologies/hackathon-normal.json \
+   --jaegerCollectorUrl http://localhost:14268 \
+   --emitOne
+```
+
+### Emit single trace with a deeply nested branch
+```
+java -jar ./target/SyntheticLoadGenerator-1.0-SNAPSHOT-jar-with-dependencies.jar \
+   --paramsFile ./topologies/hackathon-large-trace.json \
+   --jaegerCollectorUrl http://localhost:14268 \
+   --emitOne
+```
+
+![Deeply nested branch](images/hackathon-large-trace.jpg?raw=true "Deeply nested branch")
+
+
+### Emit single slow trace
+```
+java -jar ./target/SyntheticLoadGenerator-1.0-SNAPSHOT-jar-with-dependencies.jar \
+   --paramsFile ./topologies/hackathon-high-latency.json \
+   --jaegerCollectorUrl http://localhost:14268 \
+   --emitOne
+```
+
+![High latency trace](images/hackathon-high-latency.jpg?raw=true "High latency trace")
 
 This assumes that you have the `jaeger-collector` component running and listening
 on port 14268 for thrift/HTTP protocol/transport.

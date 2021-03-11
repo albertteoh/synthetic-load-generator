@@ -172,7 +172,7 @@
           {
             "route" : "/Money",
             "downstreamCalls" : { },
-            "exactLatencyMillis" : 100
+            "exactLatencyMillis" : 10000
           }
         ]
       },

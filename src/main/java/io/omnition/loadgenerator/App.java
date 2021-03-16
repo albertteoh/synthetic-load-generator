@@ -83,6 +83,8 @@ public class App {
             if (app.emitOne) {
                 System.out.println("Emitting only one trace");
                 app.emitOneTrace();
+                System.out.println("Done emitting only one trace");
+                System.exit(0);
                 return;
             }
             app.start();

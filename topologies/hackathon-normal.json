@@ -91,7 +91,6 @@
             "route" : "/PlaceOrder",
             "downstreamCalls" : { "paymentservice" : "/CreditCardInfo", "shippingservice" : "/Address", "currencyservice" : "/GetConversion", "cartservice" : "/GetCart", "emailservice" : "/SendOrderConfirmation" },
             "tagSets" : [
-              {"weight": 50, "tags": { "error" : true, "http.status_code":  503}},
               {"weight": 50, "tags":  { "span.kind" : "client" }}
             ],
             "maxLatencyMillis" : 500
@@ -149,7 +148,6 @@
             "route" : "/SendOrderConfirmation",
             "downstreamCalls" : { "emailservice" : "/OrderResult" },
             "tagSets" : [
-              {"weight": 50, "tags": { "error" : true, "http.status_code":  503}},
               {"weight": 50, "tags":  { "span.kind" : "client" }}
             ],
             "maxLatencyMillis" : 500

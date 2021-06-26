@@ -92,13 +92,14 @@ public class TraceGenerator {
         span.tags.addAll(spanTags);
 
         final AtomicLong maxEndTime = new AtomicLong(startTimeMicros);
+        int latencyMillis = route.exactLatencyMillis > 0 ? route.exactLatencyMillis : random.nextInt(route.maxLatencyMillis);
         if (span.isErrorSpan()) {
             // inject root cause error and terminate trace there
             span.markRootCauseError();
         } else {
             // no error, make downstream calls
             route.downstreamCalls.forEach((s, r) -> {
-                long childStartTimeMicros = startTimeMicros + TimeUnit.MILLISECONDS.toMicros(random.nextInt(route.maxLatencyMillis));
+                long childStartTimeMicros = startTimeMicros + TimeUnit.MILLISECONDS.toMicros(latencyMillis);
                 ServiceTier childSvc = this.topology.getServiceTier(s);
                 Span childSpan = createSpanForServiceRouteCall(routeTags, childSvc, r, childStartTimeMicros);
                 Reference ref = new Reference(RefType.CHILD_OF, span.id, childSpan.id);
@@ -113,7 +114,7 @@ public class TraceGenerator {
                 }
             });
         }
-        long ownDuration = TimeUnit.MILLISECONDS.toMicros((long)this.random.nextInt(route.maxLatencyMillis));
+        long ownDuration = TimeUnit.MILLISECONDS.toMicros(latencyMillis);
         span.endTimeMicros = maxEndTime.get() + ownDuration;
         trace.addSpan(span);
         return span;

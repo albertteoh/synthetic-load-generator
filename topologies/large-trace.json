@@ -1,0 +1,815 @@
+{
+  "topology" : {
+    "services" : [
+      {
+        "serviceName" : "frontend",
+        "instances" : [ "frontend-6b654dbf57-zq8dt", "frontend-d847fdcf5-j6s2f", "frontend-79d8c8d6c8-9sbff" ],
+        "tagSets" : [{ "tags": { "span.kind" : "server", "userId": "12345" }}],
+        "routes" : [
+          {
+            "route" : "/product",
+            "downstreamCalls" : { "productcatalogservice" : "/GetProducts", "recommendationservice" : "/GetRecommendations", "adservice" : "/AdRequest" },
+            "maxLatencyMillis": 200,
+            "tagSets": [ { "weight": 1, "tags": { "span.kind" : "client"}} ]
+          },
+          {
+            "route" : "/cart",
+            "downstreamCalls" : { "cartservice" : "/GetCart", "recommendationservice" : "/GetRecommendations" },
+            "maxLatencyMillis" : 100,
+            "tagSets": [ { "weight": 1, "tags": { "span.kind" : "client"}} ]
+          },
+          {
+            "route" : "/checkout",
+            "downstreamCalls" : { "checkoutservice" : "/PlaceOrder" },
+            "maxLatencyMillis" : 800,
+            "tagSets": [ { "weight": 1, "tags": { "span.kind" : "client"}} ]
+          },
+          {
+            "route" : "/shipping",
+            "downstreamCalls" : { "shippingservice" : "/GetQuote" },
+            "maxLatencyMillis" : 50,
+            "tagSets": [ { "weight": 1, "tags": { "span.kind" : "client"}} ]
+          },
+          {
+            "route" : "/currency",
+            "downstreamCalls" : { "currencyservice" : "/GetConversion" },
+            "maxLatencyMillis" : 50,
+            "tagSets": [ { "weight": 1, "tags": { "span.kind" : "client"}} ]
+          }
+        ]
+      },
+      {
+        "serviceName" : "productcatalogservice",
+        "instances" : [ "productcatalogservice-6b654dbf57-zq8dt", "productcatalogservice-d847fdcf5-j6s2f" ],
+        "tagSets" : [{ "tags": { "span.kind" : "server" }}],
+        "routes" : [
+          {
+            "route" : "/GetProducts",
+            "downstreamCalls" : { },
+            "maxLatencyMillis" : 100,
+            "tagSets": [ { "weight": 1, "tags": { "span.kind" : "client"}} ]
+          },
+          {
+            "route" : "/SearchProducts",
+            "downstreamCalls" : { },
+            "maxLatencyMillis" : 400,
+            "tagSets": [ { "weight": 1, "tags": { "span.kind" : "client"}} ]
+          }
+        ]
+      },
+      {
+        "serviceName" : "recommendationservice",
+        "instances" : [ "recommendationservice-6b654dbf57-zq8dt", "recommendationservice-d847fdcf5-j6s2f" ],
+        "tagSets" : [{ "tags": { "span.kind" : "server" }}],
+        "routes" : [
+          {
+            "route" : "/GetRecommendations",
+            "downstreamCalls" : { "productcatalogservice" : "/GetProducts" },
+            "maxLatencyMillis" : 200,
+            "tagSets": [ { "weight": 1, "tags": { "span.kind" : "client"}} ]
+          }
+        ]
+      },
+      {
+        "serviceName" : "cartservice",
+        "instances" : [ "cartservice-6b654dbf57-zq8dt", "cartservice-d847fdcf5-j6s2f" ],
+        "tagSets" : [{ "tags": { "span.kind" : "server" }}],
+        "routes" : [
+          {
+            "route" : "/GetCart",
+            "downstreamCalls" : { },
+            "maxLatencyMillis" : 200
+          }
+        ]
+      },
+      {
+        "serviceName" : "checkoutservice",
+        "instances" : [ "checkoutservice-6b654dbf57-zq8dt", "checkoutservice-d847fdcf5-j6s2f" ],
+        "tagSets" : [{ "tags": { "span.kind" : "server" }}],
+        "routes" : [
+          {
+            "route" : "/PlaceOrder",
+            "downstreamCalls" : { "paymentservice" : "/CreditCardInfo", "shippingservice" : "/Address", "currencyservice" : "/GetConversion", "cartservice" : "/GetCart", "emailservice" : "/SendOrderConfirmation" },
+            "tagSets" : [
+              {"weight": 50, "tags":  { "span.kind" : "client" }}
+            ],
+            "maxLatencyMillis" : 500
+          }
+        ]
+      },
+      {
+        "serviceName" : "paymentservice",
+        "instances" : [ "paymentservice-6b654dbf57-zq8dt", "paymentservice-d847fdcf5-j6s2f" ],
+        "tagSets" : [{ "tags": { "span.kind" : "server" }}],
+        "routes" : [
+          {
+            "route" : "/ChargeRequest",
+            "downstreamCalls" : { "paymentservice" : "/CreditCardInfo" },
+            "maxLatencyMillis" : 700,
+            "tagSets": [ { "weight": 1, "tags": { "span.kind" : "client"}} ]
+          },
+          {
+            "route" : "/CreditCardInfo",
+            "downstreamCalls" : { },
+            "maxLatencyMillis" : 50
+          }
+        ]
+      },
+      {
+        "serviceName" : "shippingservice",
+        "instances" : [ "shippingservice-6b654dbf57-zq8dt", "shippingservice-d847fdcf5-j6s2f" ],
+        "tagSets" : [{ "tags": { "span.kind" : "server" }}],
+        "routes" : [
+          {
+            "route" : "/GetQuote",
+            "downstreamCalls" : { "shippingservice" : "/Address" },
+            "maxLatencyMillis" : 250,
+            "tagSets": [ { "weight": 1, "tags": { "span.kind" : "client"}} ]
+          },
+          {
+            "route" : "/ShipOrder",
+            "downstreamCalls" : { "shippingservice" : "/Address"},
+            "maxLatencyMillis" : 500,
+            "tagSets": [ { "weight": 1, "tags": { "span.kind" : "client"}} ]
+          },
+          {
+            "route" : "/Address",
+            "downstreamCalls" : { },
+            "maxLatencyMillis" : 100
+          }
+        ]
+      },
+      {
+        "serviceName" : "emailservice",
+        "instances" : [ "emailservice-6b654dbf57-zq8dt", "emailservice-d847fdcf5-j6s2f" ],
+        "tagSets" : [{ "tags": { "span.kind" : "server" }}],
+        "routes" : [
+          {
+            "route" : "/SendOrderConfirmation",
+            "downstreamCalls" : { "emailservice" : "/OrderResult" },
+            "tagSets" : [
+              {"weight": 50, "tags":  { "span.kind" : "client" }}
+            ],
+            "maxLatencyMillis" : 500
+          },
+          {
+            "route" : "/OrderResult",
+            "downstreamCalls" : { },
+            "maxLatencyMillis" : 100
+          }
+        ]
+      },
+      {
+        "serviceName" : "currencyservice",
+        "instances" : [ "currencyservice-6b654dbf57-zq8dt", "currencyservice-d847fdcf5-j6s2f" ],
+        "tagSets" : [{ "tags": { "span.kind" : "server" }}],
+        "routes" : [
+          {
+            "route" : "/GetConversion",
+            "downstreamCalls" : { "currencyservice" : "/Money" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money",
+            "downstreamCalls" : { "currencyservice" : "/Money0" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money0",
+            "downstreamCalls" : { "currencyservice" : "/Money1" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money1",
+            "downstreamCalls" : { "currencyservice" : "/Money2" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money2",
+            "downstreamCalls" : { "currencyservice" : "/Money3" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money3",
+            "downstreamCalls" : { "currencyservice" : "/Money4" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money4",
+            "downstreamCalls" : { "currencyservice" : "/Money5" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money5",
+            "downstreamCalls" : { "currencyservice" : "/Money6" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money6",
+            "downstreamCalls" : { "currencyservice" : "/Money7" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money7",
+            "downstreamCalls" : { "currencyservice" : "/Money8" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money8",
+            "downstreamCalls" : { "currencyservice" : "/Money9" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money9",
+            "downstreamCalls" : { "currencyservice" : "/Money10" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money10",
+            "downstreamCalls" : { "currencyservice" : "/Money11" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money11",
+            "downstreamCalls" : { "currencyservice" : "/Money12" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money12",
+            "downstreamCalls" : { "currencyservice" : "/Money13" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money13",
+            "downstreamCalls" : { "currencyservice" : "/Money14" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money14",
+            "downstreamCalls" : { "currencyservice" : "/Money15" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money15",
+            "downstreamCalls" : { "currencyservice" : "/Money16" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money16",
+            "downstreamCalls" : { "currencyservice" : "/Money17" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money17",
+            "downstreamCalls" : { "currencyservice" : "/Money18" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money18",
+            "downstreamCalls" : { "currencyservice" : "/Money19" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money19",
+            "downstreamCalls" : { "currencyservice" : "/Money20" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money20",
+            "downstreamCalls" : { "currencyservice" : "/Money21" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money21",
+            "downstreamCalls" : { "currencyservice" : "/Money22" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money22",
+            "downstreamCalls" : { "currencyservice" : "/Money23" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money23",
+            "downstreamCalls" : { "currencyservice" : "/Money24" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money24",
+            "downstreamCalls" : { "currencyservice" : "/Money25" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money25",
+            "downstreamCalls" : { "currencyservice" : "/Money26" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money26",
+            "downstreamCalls" : { "currencyservice" : "/Money27" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money27",
+            "downstreamCalls" : { "currencyservice" : "/Money28" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money28",
+            "downstreamCalls" : { "currencyservice" : "/Money29" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money29",
+            "downstreamCalls" : { "currencyservice" : "/Money30" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money30",
+            "downstreamCalls" : { "currencyservice" : "/Money31" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money31",
+            "downstreamCalls" : { "currencyservice" : "/Money32" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money32",
+            "downstreamCalls" : { "currencyservice" : "/Money33" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money33",
+            "downstreamCalls" : { "currencyservice" : "/Money34" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money34",
+            "downstreamCalls" : { "currencyservice" : "/Money35" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money35",
+            "downstreamCalls" : { "currencyservice" : "/Money36" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money36",
+            "downstreamCalls" : { "currencyservice" : "/Money37" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money37",
+            "downstreamCalls" : { "currencyservice" : "/Money38" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money38",
+            "downstreamCalls" : { "currencyservice" : "/Money39" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money39",
+            "downstreamCalls" : { "currencyservice" : "/Money40" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money40",
+            "downstreamCalls" : { "currencyservice" : "/Money41" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money41",
+            "downstreamCalls" : { "currencyservice" : "/Money42" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money42",
+            "downstreamCalls" : { "currencyservice" : "/Money43" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money43",
+            "downstreamCalls" : { "currencyservice" : "/Money44" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money44",
+            "downstreamCalls" : { "currencyservice" : "/Money45" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money45",
+            "downstreamCalls" : { "currencyservice" : "/Money46" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money46",
+            "downstreamCalls" : { "currencyservice" : "/Money47" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money47",
+            "downstreamCalls" : { "currencyservice" : "/Money48" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money48",
+            "downstreamCalls" : { "currencyservice" : "/Money49" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money49",
+            "downstreamCalls" : { "currencyservice" : "/Money50" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money50",
+            "downstreamCalls" : { "currencyservice" : "/Money51" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money51",
+            "downstreamCalls" : { "currencyservice" : "/Money52" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money52",
+            "downstreamCalls" : { "currencyservice" : "/Money53" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money53",
+            "downstreamCalls" : { "currencyservice" : "/Money54" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money54",
+            "downstreamCalls" : { "currencyservice" : "/Money55" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money55",
+            "downstreamCalls" : { "currencyservice" : "/Money56" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money56",
+            "downstreamCalls" : { "currencyservice" : "/Money57" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money57",
+            "downstreamCalls" : { "currencyservice" : "/Money58" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money58",
+            "downstreamCalls" : { "currencyservice" : "/Money59" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money59",
+            "downstreamCalls" : { "currencyservice" : "/Money60" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money60",
+            "downstreamCalls" : { "currencyservice" : "/Money61" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money61",
+            "downstreamCalls" : { "currencyservice" : "/Money62" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money62",
+            "downstreamCalls" : { "currencyservice" : "/Money63" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money63",
+            "downstreamCalls" : { "currencyservice" : "/Money64" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money64",
+            "downstreamCalls" : { "currencyservice" : "/Money65" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money65",
+            "downstreamCalls" : { "currencyservice" : "/Money66" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money66",
+            "downstreamCalls" : { "currencyservice" : "/Money67" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money67",
+            "downstreamCalls" : { "currencyservice" : "/Money68" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money68",
+            "downstreamCalls" : { "currencyservice" : "/Money69" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money69",
+            "downstreamCalls" : { "currencyservice" : "/Money70" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money70",
+            "downstreamCalls" : { "currencyservice" : "/Money71" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money71",
+            "downstreamCalls" : { "currencyservice" : "/Money72" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money72",
+            "downstreamCalls" : { "currencyservice" : "/Money73" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money73",
+            "downstreamCalls" : { "currencyservice" : "/Money74" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money74",
+            "downstreamCalls" : { "currencyservice" : "/Money75" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money75",
+            "downstreamCalls" : { "currencyservice" : "/Money76" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money76",
+            "downstreamCalls" : { "currencyservice" : "/Money77" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money77",
+            "downstreamCalls" : { "currencyservice" : "/Money78" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money78",
+            "downstreamCalls" : { "currencyservice" : "/Money79" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money79",
+            "downstreamCalls" : { "currencyservice" : "/Money80" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money80",
+            "downstreamCalls" : { "currencyservice" : "/Money81" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money81",
+            "downstreamCalls" : { "currencyservice" : "/Money82" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money82",
+            "downstreamCalls" : { "currencyservice" : "/Money83" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money83",
+            "downstreamCalls" : { "currencyservice" : "/Money84" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money84",
+            "downstreamCalls" : { "currencyservice" : "/Money85" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money85",
+            "downstreamCalls" : { "currencyservice" : "/Money86" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money86",
+            "downstreamCalls" : { "currencyservice" : "/Money87" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money87",
+            "downstreamCalls" : { "currencyservice" : "/Money88" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money88",
+            "downstreamCalls" : { "currencyservice" : "/Money89" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money89",
+            "downstreamCalls" : { "currencyservice" : "/Money90" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money90",
+            "downstreamCalls" : { "currencyservice" : "/Money91" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money91",
+            "downstreamCalls" : { "currencyservice" : "/Money92" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money92",
+            "downstreamCalls" : { "currencyservice" : "/Money93" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money93",
+            "downstreamCalls" : { "currencyservice" : "/Money94" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money94",
+            "downstreamCalls" : { "currencyservice" : "/Money95" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money95",
+            "downstreamCalls" : { "currencyservice" : "/Money96" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money96",
+            "downstreamCalls" : { "currencyservice" : "/Money97" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money97",
+            "downstreamCalls" : { "currencyservice" : "/Money98" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money98",
+            "downstreamCalls" : { "currencyservice" : "/Money99" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money99",
+            "downstreamCalls" : { "currencyservice" : "/Money100" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money100",
+            "downstreamCalls" : { "currencyservice" : "/Money101" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money101",
+            "downstreamCalls" : { "currencyservice" : "/Money102" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money102",
+            "downstreamCalls" : { "currencyservice" : "/Money103" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money103",
+            "downstreamCalls" : { "currencyservice" : "/Money104" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money104",
+            "downstreamCalls" : { "currencyservice" : "/Money105" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money105",
+            "downstreamCalls" : { "currencyservice" : "/Money106" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money106",
+            "downstreamCalls" : { "currencyservice" : "/Money107" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money107",
+            "downstreamCalls" : { "currencyservice" : "/Money108" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money108",
+            "downstreamCalls" : { "currencyservice" : "/Money109" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money109",
+            "downstreamCalls" : { "currencyservice" : "/Money110" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money110",
+            "downstreamCalls" : { "currencyservice" : "/Money111" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money111",
+            "downstreamCalls" : { "currencyservice" : "/Money112" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money112",
+            "downstreamCalls" : { "currencyservice" : "/Money113" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money113",
+            "downstreamCalls" : { "currencyservice" : "/Money114" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money114",
+            "downstreamCalls" : { "currencyservice" : "/Money115" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money115",
+            "downstreamCalls" : { "currencyservice" : "/Money116" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money116",
+            "downstreamCalls" : { "currencyservice" : "/Money117" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money117",
+            "downstreamCalls" : { "currencyservice" : "/Money118" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money118",
+            "downstreamCalls" : { "currencyservice" : "/Money119" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money119",
+            "downstreamCalls" : { "currencyservice" : "/Money120" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money120",
+            "downstreamCalls" : { "currencyservice" : "/Money121" },
+            "maxLatencyMillis" : 100
+          },
+          {
+            "route" : "/Money121",
+            "downstreamCalls" : { },
+            "maxLatencyMillis" : 100
+          }
+        ]
+      },
+      {
+        "serviceName" : "adservice",
+        "instances" : [ "adservice-6b654dbf57-zq8dt", "adservice-d847fdcf5-j6s2f" ],
+        "tagSets" : [{ "tags": { "span.kind" : "server" }}],
+        "routes" : [
+          {
+            "route" : "/AdRequest",
+            "downstreamCalls" : { },
+            "maxLatencyMillis" : 500
+          },
+          {
+            "route" : "/Ad",
+            "downstreamCalls" : { },
+            "maxLatencyMillis" : 500
+          }
+        ]
+      }
+    ]
+  },
+  "rootRoutes" : [
+    {
+      "service" : "frontend",
+      "route" : "/checkout",
+      "tracesPerHour" : 3600
+    }
+  ]
+}

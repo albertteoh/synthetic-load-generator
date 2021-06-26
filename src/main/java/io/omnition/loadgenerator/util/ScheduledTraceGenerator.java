@@ -73,7 +73,7 @@ public class ScheduledTraceGenerator {
         scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
     }
 
-    private void emitOneTrace() {
+    public void emitOneTrace() {
         try {
             long now = TimeUnit.MILLISECONDS.toMicros(System.currentTimeMillis());
             Trace trace = TraceGenerator.generate(this.topology, this.service, this.route, now);
